@@ -1,7 +1,9 @@
 package springCourse.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import springCourse.dao.PersonDAO;
 import springCourse.models.Person;
@@ -33,23 +35,32 @@ public class PeopleController {
     }
 
     @PostMapping()
-    public String create(@ModelAttribute("person") Person person){
+    public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        if (bindingResult.hasErrors())
+            return "people/edit";
+
         personDAO.addPerson(person);
         return "redirect:/people";
     }
 
-    @GetMapping ("/{id}/edit")
-    public String edit(@PathVariable int id, Model model){
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable int id, Model model) {
         model.addAttribute("person", personDAO.show(id));
         return "people/edit";
     }
+
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute Person person, @PathVariable int id){
-        personDAO.updatePerson(person,id);
+    public String update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult,
+                         @PathVariable int id) {
+        if (bindingResult.hasErrors())
+            return "people/edit";
+
+        personDAO.updatePerson(person, id);
         return "redirect:/people";
     }
+
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable int id){
+    public String delete(@PathVariable int id) {
         personDAO.delete(id);
         return "redirect:/people";
     }
