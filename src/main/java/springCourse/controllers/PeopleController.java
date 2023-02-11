@@ -8,14 +8,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import springCourse.dao.PersonDAO;
 import springCourse.models.Person;
+import springCourse.util.PersonValidator;
 
 @Controller
 @RequestMapping("/people")
 public class PeopleController {
+
+    private final PersonValidator personValidator;
     private final PersonDAO personDAO;
 
     @Autowired
-    public PeopleController(PersonDAO personDao) {
+    public PeopleController(PersonValidator personValidator, PersonDAO personDao) {
+        this.personValidator = personValidator;
         this.personDAO = personDao;
     }
 
@@ -38,6 +42,7 @@ public class PeopleController {
 
     @PostMapping()
     public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        personValidator.validate(person,bindingResult);
         if (bindingResult.hasErrors())
             return "people/edit";
 
@@ -54,6 +59,7 @@ public class PeopleController {
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult,
                          @PathVariable int id) {
+        personValidator.validate(person,bindingResult);
         if (bindingResult.hasErrors())
             return "people/edit";
 
